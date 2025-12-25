@@ -8,14 +8,16 @@ export const Home: React.FC = () => {
   const featured = MENU_ITEMS.filter(item => item.popular).slice(0, 3);
 
   return (
-    <div className="space-y-20 pb-20">
+    <div className="space-y-12 md:space-y-20 pb-20">
       {/* Hero */}
       <section className="relative h-[85vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent z-10" />
+        <div className="absolute inset-0 bg-slate-900 img-placeholder" />
         <img 
           src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1920&q=80" 
           className="absolute inset-0 w-full h-full object-cover"
           alt="Crazy Chicken Feast"
+          onLoad={(e) => (e.currentTarget.parentElement?.querySelector('.img-placeholder') as HTMLElement)?.classList.add('hidden')}
         />
         <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="max-w-xl space-y-6 text-white">
@@ -83,16 +85,18 @@ export const Home: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {featured.map((product) => (
             <div key={product.id} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 flex flex-col">
-              <div className="h-64 relative overflow-hidden">
+              <div className="h-64 relative overflow-hidden bg-amber-50">
+                <div className="absolute inset-0 img-placeholder" />
                 <img 
                   src={product.image} 
                   alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 relative z-10"
+                  onLoad={(e) => (e.currentTarget.parentElement?.querySelector('.img-placeholder') as HTMLElement)?.classList.add('hidden')}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
+                    (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
                   }}
                 />
-                <div className="absolute top-4 right-4 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                <div className="absolute top-4 right-4 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg z-20">
                   Popular
                 </div>
               </div>
@@ -117,7 +121,7 @@ export const Home: React.FC = () => {
       </section>
 
       {/* Tea Heritage Section */}
-      <section className="bg-amber-100/50 py-20 overflow-hidden">
+      <section className="bg-amber-100/50 py-12 md:py-20 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
@@ -153,12 +157,24 @@ export const Home: React.FC = () => {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4">
-                <img src="https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?auto=format&fit=crop&w=800&q=80" className="rounded-3xl shadow-lg w-full h-64 object-cover hover:scale-[1.02] transition-transform duration-500" alt="Pouring Tea" />
-                <img src="https://images.unsplash.com/photo-1594631252845-29fc458695d6?auto=format&fit=crop&w=800&q=80" className="rounded-3xl shadow-lg w-full h-48 object-cover hover:scale-[1.02] transition-transform duration-500" alt="Milk Tea" />
+                <div className="relative rounded-3xl shadow-lg overflow-hidden h-64 bg-amber-100">
+                   <div className="absolute inset-0 img-placeholder" />
+                   <img src="https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?auto=format&fit=crop&w=800&q=80" className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-500 relative z-10" alt="Pouring Tea" onLoad={(e) => (e.currentTarget.parentElement?.querySelector('.img-placeholder') as HTMLElement)?.classList.add('hidden')} />
+                </div>
+                <div className="relative rounded-3xl shadow-lg overflow-hidden h-48 bg-amber-100">
+                   <div className="absolute inset-0 img-placeholder" />
+                   <img src="https://images.unsplash.com/photo-1594631252845-29fc458695d6?auto=format&fit=crop&w=800&q=80" className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-500 relative z-10" alt="Milk Tea" onLoad={(e) => (e.currentTarget.parentElement?.querySelector('.img-placeholder') as HTMLElement)?.classList.add('hidden')} />
+                </div>
               </div>
               <div className="space-y-4 pt-12">
-                <img src="https://images.unsplash.com/photo-1544787210-2213d84ad964?auto=format&fit=crop&w=800&q=80" className="rounded-3xl shadow-lg w-full h-64 object-cover hover:scale-[1.02] transition-transform duration-500" alt="Spiced Tea" />
-                <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=800&q=80" className="rounded-3xl shadow-lg w-full h-48 object-cover hover:scale-[1.02] transition-transform duration-500" alt="Black Tea" />
+                <div className="relative rounded-3xl shadow-lg overflow-hidden h-64 bg-amber-100">
+                   <div className="absolute inset-0 img-placeholder" />
+                   <img src="https://images.unsplash.com/photo-1544787210-2213d84ad964?auto=format&fit=crop&w=800&q=80" className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-500 relative z-10" alt="Spiced Tea" onLoad={(e) => (e.currentTarget.parentElement?.querySelector('.img-placeholder') as HTMLElement)?.classList.add('hidden')} />
+                </div>
+                <div className="relative rounded-3xl shadow-lg overflow-hidden h-48 bg-amber-100">
+                   <div className="absolute inset-0 img-placeholder" />
+                   <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=800&q=80" className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-500 relative z-10" alt="Black Tea" onLoad={(e) => (e.currentTarget.parentElement?.querySelector('.img-placeholder') as HTMLElement)?.classList.add('hidden')} />
+                </div>
               </div>
             </div>
           </div>
@@ -167,7 +183,7 @@ export const Home: React.FC = () => {
 
       {/* Promo Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-orange-600 rounded-[2.5rem] p-8 md:p-16 relative overflow-hidden text-white">
+        <div className="bg-orange-600 rounded-[2.5rem] p-8 md:p-16 relative overflow-hidden text-white shadow-2xl">
           <div className="relative z-10 max-w-2xl space-y-6">
             <h2 className="text-4xl md:text-5xl font-bold leading-tight">Plan a Celebration at Crazy Chicken</h2>
             <p className="text-orange-100 text-lg">
@@ -180,11 +196,13 @@ export const Home: React.FC = () => {
               </Link>
             </div>
           </div>
-          <div className="absolute right-0 top-0 bottom-0 w-1/3 hidden lg:block">
+          <div className="absolute right-0 top-0 bottom-0 w-1/3 hidden lg:block bg-orange-700">
+            <div className="absolute inset-0 img-placeholder opacity-20" />
             <img 
               src="https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=600&q=80" 
-              className="w-full h-full object-cover mix-blend-multiply opacity-50"
+              className="w-full h-full object-cover mix-blend-multiply opacity-50 relative z-10"
               alt="Platter"
+              onLoad={(e) => (e.currentTarget.parentElement?.querySelector('.img-placeholder') as HTMLElement)?.classList.add('hidden')}
             />
           </div>
         </div>

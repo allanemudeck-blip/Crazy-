@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ShoppingCart, Search, Filter } from 'lucide-react';
+import { ShoppingCart, Search } from 'lucide-react';
 import { MENU_ITEMS } from '../constants';
 import { Category } from '../types';
 import { useCart } from '../context/CartContext';
@@ -64,16 +64,18 @@ export const Menu: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
             {filteredItems.map((product) => (
               <div key={product.id} className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 flex flex-col group">
-                <div className="h-56 relative overflow-hidden">
+                <div className="h-56 relative overflow-hidden bg-amber-50">
+                  <div className="absolute inset-0 img-placeholder" />
                   <img 
                     src={product.image} 
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 relative z-10"
+                    onLoad={(e) => (e.currentTarget.parentElement?.querySelector('.img-placeholder') as HTMLElement)?.classList.add('hidden')}
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
                     }}
                   />
-                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors z-20" />
                 </div>
                 <div className="p-6 flex-grow flex flex-col justify-between">
                   <div className="mb-4">
@@ -100,7 +102,7 @@ export const Menu: React.FC = () => {
         ) : (
           <div className="text-center py-24 space-y-4">
             <div className="inline-flex p-6 bg-slate-100 rounded-full">
-              <Search className="w-12 h-12 text-slate-400" />
+              <ShoppingCart className="w-12 h-12 text-slate-400" />
             </div>
             <h3 className="text-2xl font-bold text-slate-800">No items found</h3>
             <p className="text-slate-500">Try adjusting your search or category filters.</p>
