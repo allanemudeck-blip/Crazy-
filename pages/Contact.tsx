@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Phone, Mail, MapPin, Send, MessageCircle, Loader2, CheckCircle } from 'lucide-react';
 import { RESTAURANT_CONFIG } from '../constants';
+import { supabase } from '../lib/supabase';
 
 export const Contact: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,27 +19,24 @@ export const Contact: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('https://formspree.io/f/mzdpwvvq', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          ...formData,
-          _subject: `New Contact Message: ${formData.subject} from ${formData.name}`
-        })
-      });
+      const { error } = await supabase
+        .from('contacts')
+        .insert([
+          {
+            name: formData.name,
+            phone: formData.phone,
+            subject: formData.subject,
+            message: formData.message
+          }
+        ]);
 
-      if (response.ok) {
-        setIsSuccess(true);
-        setFormData({ name: '', phone: '', subject: 'General Inquiry', message: '' });
-      } else {
-        alert('Oops! There was a problem submitting your form.');
-      }
-    } catch (error) {
+      if (error) throw error;
+
+      setIsSuccess(true);
+      setFormData({ name: '', phone: '', subject: 'General Inquiry', message: '' });
+    } catch (error: any) {
       console.error('Error submitting form:', error);
-      alert('Network error. Please try again.');
+      alert(`Oops! There was a problem: ${error.message || 'Please verify your Supabase setup.'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -48,7 +46,6 @@ export const Contact: React.FC = () => {
     <div className="min-h-screen pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Info Side */}
           <div className="space-y-12">
             <div className="space-y-4">
               <h1 className="text-5xl font-bold text-slate-900 leading-tight">Get in <span className="text-orange-600">Touch</span></h1>
@@ -90,7 +87,6 @@ export const Contact: React.FC = () => {
             </div>
           </div>
 
-          {/* Form Side */}
           <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl border border-slate-100">
             {isSuccess ? (
               <div className="text-center py-12 space-y-6 animate-in fade-in zoom-in duration-500">
@@ -99,7 +95,7 @@ export const Contact: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-3xl font-bold text-slate-900">Message Sent!</h3>
-                  <p className="text-slate-500">Thank you for reaching out. Our team will get back to you shortly.</p>
+                  <p className="text-slate-500">Your inquiry has been saved to our database. Our team will get back to you shortly.</p>
                 </div>
                 <button 
                   onClick={() => setIsSuccess(false)}
@@ -118,7 +114,6 @@ export const Contact: React.FC = () => {
                       <input 
                         required
                         type="text" 
-                        name="name"
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-orange-500 outline-none" 
                         placeholder="John" 
                         value={formData.name}
@@ -130,7 +125,6 @@ export const Contact: React.FC = () => {
                       <input 
                         required
                         type="tel" 
-                        name="phone"
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-orange-500 outline-none" 
                         placeholder="+256..." 
                         value={formData.phone}
@@ -141,7 +135,6 @@ export const Contact: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-700">Subject</label>
                     <select 
-                      name="subject"
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-orange-500 outline-none"
                       value={formData.subject}
                       onChange={(e) => setFormData({...formData, subject: e.target.value})}
@@ -156,7 +149,6 @@ export const Contact: React.FC = () => {
                     <label className="text-sm font-semibold text-slate-700">Your Message</label>
                     <textarea 
                       required
-                      name="message"
                       rows={4} 
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-orange-500 outline-none resize-none" 
                       placeholder="Tell us how we can help..." 

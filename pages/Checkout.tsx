@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Truck, Hotel, Coffee, CheckCircle, MessageSquare, Loader2 } from 'lucide-react';
+import { Truck, Hotel, Coffee, CheckCircle, MessageSquare, Loader2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { RESTAURANT_CONFIG } from '../constants';
+import { supabase } from '../lib/supabase';
 
 export const Checkout: React.FC = () => {
   const { cart, totalPrice, clearCart } = useCart();
@@ -33,31 +34,30 @@ export const Checkout: React.FC = () => {
     const itemsText = cart.map(item => `${item.name} (x${item.quantity})`).join(', ');
     
     try {
-      // Submit to Formspree
-      const response = await fetch('https://formspree.io/f/mzdpwvvq', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          ...formData,
-          orderItems: itemsText,
-          totalAmount: `UGX ${totalPrice.toLocaleString()}`,
-          _subject: `New Order from ${formData.name}`
-        })
-      });
+      // 1. Save order to Supabase
+      const { error } = await supabase
+        .from('orders')
+        .insert([
+          {
+            customer_name: formData.name,
+            phone: formData.phone,
+            delivery_type: formData.deliveryType,
+            room_number: formData.roomNumber || null,
+            payment_method: formData.payment,
+            items: itemsText,
+            total_price: totalPrice
+          }
+        ]);
 
-      if (response.ok) {
-        handleWhatsAppOrder();
-        setStep('success');
-        clearCart();
-      } else {
-        alert('There was an error processing your order. Please try again or contact us via WhatsApp directly.');
-      }
-    } catch (error) {
-      console.error('Submission error:', error);
-      alert('Network error. Please try again.');
+      if (error) throw error;
+
+      // 2. Launch WhatsApp and update UI
+      handleWhatsAppOrder();
+      setStep('success');
+      clearCart();
+    } catch (error: any) {
+      console.error('Supabase Error:', error);
+      alert(`Submission error: ${error.message || 'Please check if your Supabase tables are set up correctly.'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -72,7 +72,7 @@ export const Checkout: React.FC = () => {
         <div className="space-y-3">
           <h1 className="text-4xl font-bold text-slate-900">Order Received!</h1>
           <p className="text-slate-500 max-w-md mx-auto">
-            Your order has been sent to our kitchen and recorded. We will contact you shortly to confirm your pickup or delivery.
+            Your order has been recorded in our database. We will contact you shortly to confirm your pickup or delivery.
           </p>
         </div>
         <button 
@@ -94,7 +94,6 @@ export const Checkout: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-10">
-          {/* Customer Details */}
           <section className="space-y-6">
             <h3 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
               <span className="w-8 h-8 bg-amber-100 text-orange-600 rounded-full flex items-center justify-center text-sm">1</span>
@@ -106,7 +105,6 @@ export const Checkout: React.FC = () => {
                 <input 
                   required
                   type="text"
-                  name="name"
                   placeholder="John Doe"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-orange-500 outline-none transition-all"
                   value={formData.name}
@@ -118,7 +116,6 @@ export const Checkout: React.FC = () => {
                 <input 
                   required
                   type="tel"
-                  name="phone"
                   placeholder="+256..."
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-orange-500 outline-none transition-all"
                   value={formData.phone}
@@ -128,7 +125,6 @@ export const Checkout: React.FC = () => {
             </div>
           </section>
 
-          {/* Delivery Options */}
           <section className="space-y-6">
             <h3 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
               <span className="w-8 h-8 bg-amber-100 text-orange-600 rounded-full flex items-center justify-center text-sm">2</span>
@@ -162,7 +158,6 @@ export const Checkout: React.FC = () => {
                 <input 
                   required
                   type="text"
-                  name="roomNumber"
                   placeholder="e.g. Room 402"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-orange-500 outline-none transition-all"
                   value={formData.roomNumber}
@@ -172,7 +167,6 @@ export const Checkout: React.FC = () => {
             )}
           </section>
 
-          {/* Payment Methods */}
           <section className="space-y-6">
             <h3 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
               <span className="w-8 h-8 bg-amber-100 text-orange-600 rounded-full flex items-center justify-center text-sm">3</span>
@@ -199,17 +193,8 @@ export const Checkout: React.FC = () => {
                 </button>
               ))}
             </div>
-            
-            {/* Payment Logos Display */}
-            <div className="bg-slate-50 p-6 rounded-2xl flex flex-wrap justify-center gap-6 opacity-60">
-              <div className="font-bold text-slate-400">VISA</div>
-              <div className="font-bold text-slate-400">MasterCard</div>
-              <div className="font-bold text-slate-400">MTN MoMo</div>
-              <div className="font-bold text-slate-400">Airtel Money</div>
-            </div>
           </section>
 
-          {/* Place Order */}
           <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <p className="text-slate-500 text-sm">Total to Pay</p>
