@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Truck, Hotel, Coffee, CheckCircle, MessageSquare, Loader2 } from 'lucide-react';
+import { Truck, Hotel, Coffee, CheckCircle, MessageSquare, Loader2, Info } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { RESTAURANT_CONFIG } from '../constants';
 import { supabase } from '../lib/supabase';
@@ -34,13 +34,13 @@ export const Checkout: React.FC = () => {
     const itemsText = cart.map(item => `${item.name} (x${item.quantity})`).join(', ');
     
     try {
-      // 1. Save order to Supabase
+      console.log('Saving order to table: orders...');
       const { error } = await supabase
         .from('orders')
         .insert([
           {
             customer_name: formData.name,
-            phone: formData.phone,
+            phone_number: formData.phone, 
             delivery_type: formData.deliveryType,
             room_number: formData.roomNumber || null,
             payment_method: formData.payment,
@@ -49,15 +49,17 @@ export const Checkout: React.FC = () => {
           }
         ]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Order Error:', error);
+        alert(`Failed to save order: ${error.message}`);
+        return;
+      }
 
-      // 2. Launch WhatsApp and update UI
       handleWhatsAppOrder();
       setStep('success');
       clearCart();
-    } catch (error: any) {
-      console.error('Supabase Error:', error);
-      alert(`Submission error: ${error.message || 'Please check if your Supabase tables are set up correctly.'}`);
+    } catch (err: any) {
+      alert(`System Error: ${err.message || 'Failed to process order.'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -174,10 +176,10 @@ export const Checkout: React.FC = () => {
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
-                { id: 'Mobile Money', label: 'MTN / Airtel' },
+                { id: 'Mobile Money', label: 'Airtel / MTN' },
                 { id: 'Visa', label: 'Visa / Card' },
                 { id: 'Virtual Card', label: 'Virtual Card' },
-                { id: 'Cash', label: 'Cash on Delivery' }
+                { id: 'Cash', label: 'Cash' }
               ].map(method => (
                 <button
                   key={method.id}
@@ -193,6 +195,19 @@ export const Checkout: React.FC = () => {
                 </button>
               ))}
             </div>
+
+            {formData.payment === 'Mobile Money' && (
+              <div className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-start space-x-3 animate-in fade-in slide-in-from-top-2">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <Info className="w-5 h-5 text-red-600" />
+                </div>
+                <div className="text-sm">
+                  <p className="font-bold text-red-900">Airtel Money Preferred</p>
+                  <p className="text-red-700">Please pay to: <span className="font-mono font-bold">{RESTAURANT_CONFIG.whatsapp}</span> (Airtel Money)</p>
+                  <p className="text-red-600 text-xs mt-1">Include your name as reason during payment.</p>
+                </div>
+              </div>
+            )}
           </section>
 
           <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">

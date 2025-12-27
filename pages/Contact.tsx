@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Phone, Mail, MapPin, Send, MessageCircle, Loader2, CheckCircle } from 'lucide-react';
 import { RESTAURANT_CONFIG } from '../constants';
@@ -19,24 +18,32 @@ export const Contact: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      console.log('Sending message to Supabase table: messages...');
+      
       const { error } = await supabase
-        .from('contacts')
+        .from('messages') // Changed from 'contacts' to match task requirement
         .insert([
           {
-            name: formData.name,
-            phone: formData.phone,
+            full_name: formData.name,      // Changed key to match table schema
+            phone_number: formData.phone,  // Changed key to match table schema
             subject: formData.subject,
             message: formData.message
           }
         ]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase Error:', error);
+        // Show actual message string instead of [object Object]
+        alert(`Failed to send message: ${error.message || 'Check if the "messages" table exists with full_name and phone_number columns.'}`);
+        return;
+      }
 
+      console.log('Successfully saved to Supabase');
       setIsSuccess(true);
       setFormData({ name: '', phone: '', subject: 'General Inquiry', message: '' });
-    } catch (error: any) {
-      console.error('Error submitting form:', error);
-      alert(`Oops! There was a problem: ${error.message || 'Please verify your Supabase setup.'}`);
+    } catch (err: any) {
+      console.error('Unexpected System Error:', err);
+      alert(`System Error: ${err.message || 'An unknown error occurred'}`);
     } finally {
       setIsSubmitting(false);
     }

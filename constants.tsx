@@ -3,7 +3,7 @@ import { Product } from './types';
 
 export const RESTAURANT_CONFIG = {
   name: 'Crazy Chicken',
-  whatsapp: '+25676646667',
+  whatsapp: '+256742608851',
   email: 'allanemudeck@gmail.com',
   location: 'Kampala, Uganda',
   currency: 'UGX',
